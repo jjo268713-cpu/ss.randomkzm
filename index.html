@@ -4,13 +4,14 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Subway Surfers - Training Edition</title>
+    <title>Subway Surfers - Modded Edition</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script type="text/javascript">
-        document.domain = '4399.com'
+        document.domain = '4399.com';
     </script>
     <script type="text/javascript" src="4399.js"></script>
     <script>
+        // Set configuration details and inject specific variables for loading target map
         window.config = {
             loader: 'unity',
             debug: false,
@@ -21,7 +22,12 @@
             numScreenshots: 4,
 
             unityVersion: '2019.4.18f1',
-            unityWebglBuildUrl: 'Build\/SanFrancisco.json',
+            unityWebglBuildUrl: 'Build/SanFrancisco.json',
+
+            // Custom global parameter handles to influence map loading processes
+            mapName: 'st_training_map',
+            environment: 'training',
+            enableCheats: true,
 
             fileSize: 35,
             cachedDecompressedFileSizes: {
@@ -31,332 +37,70 @@
                 'SanFrancisco.data.unityweb': 18323917,
                 'SanFrancisco.wasm.code.unityweb': 7279617,
                 'SanFrancisco.wasm.framework.unityweb': 90693,
-            },
+            }
         };
+
+        // WASD Input Translation Overlay Layer
+        (function() {
+            const keysToMap = {
+                'KeyW': { key: 'ArrowUp', keyCode: 38, code: 'ArrowUp' },
+                'KeyS': { key: 'ArrowDown', keyCode: 40, code: 'ArrowDown' },
+                'KeyA': { key: 'ArrowLeft', keyCode: 37, code: 'ArrowLeft' },
+                'KeyD': { key: 'ArrowRight', keyCode: 39, code: 'ArrowRight' }
+            };
+
+            function triggerSimulatedKey(original, phase) {
+                if (keysToMap[original.code]) {
+                    original.stopImmediatePropagation();
+                    original.preventDefault();
+
+                    const canvas = document.querySelector('canvas') || document.getElementById('canvas');
+                    if (canvas) {
+                        const simulated = new KeyboardEvent(phase, {
+                            key: keysToMap[original.code].key,
+                            code: keysToMap[original.code].code,
+                            keyCode: keysToMap[original.code].keyCode,
+                            which: keysToMap[original.code].keyCode,
+                            bubbles: true,
+                            cancelable: true
+                        });
+                        canvas.dispatchEvent(simulated);
+                    }
+                }
+            }
+
+            window.addEventListener('keydown', function(e) { triggerSimulatedKey(e, 'keydown'); }, true);
+            window.addEventListener('keyup', function(e) { triggerSimulatedKey(e, 'keyup'); }, true);
+        })();
     </script>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #111;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #fff;
-        }
-
-        /* Startup Hub Selection Screen */
-        #mode-screen {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: linear-gradient(135deg, #1e1e2f, #111);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.4s ease;
-        }
-
-        #mode-screen h1 {
-            font-size: 3rem;
-            margin-bottom: 30px;
-            text-shadow: 0 0 15px #ff007f;
-            color: #ff007f;
-        }
-
-        .btn-container {
-            display: flex;
-            gap: 20px;
-        }
-
-        .menu-btn {
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #fff;
-            background: #282a36;
-            border: 2px solid #44475a;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .menu-btn:hover {
-            background: #ff007f;
-            border-color: #ff79c6;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.4);
-        }
-
-        /* Trainer Overlay Panel (Ctrl + K) */
-        #mod-menu {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            width: 310px;
-            background: rgba(20, 20, 25, 0.95);
-            border: 2px solid #ff007f;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
-            display: none; 
-            z-index: 10000;
-            pointer-events: auto;
-        }
-
-        #mod-menu h2 {
-            margin-top: 0;
-            font-size: 1.4rem;
-            color: #ff007f;
-            border-bottom: 1px solid #333;
-            padding-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .menu-status {
-            font-size: 0.75rem;
-            background: #222;
-            padding: 3px 8px;
-            border-radius: 4px;
-            color: #50fa7b;
-        }
-
-        .mod-option {
-            margin: 15px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 46px;
-            height: 22px;
-        }
-
-        .switch input { display: none; }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #444;
-            transition: .3s;
-            border-radius: 22px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px; width: 16px;
-            left: 3px; bottom: 3px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider { background-color: #ff007f; }
-        input:checked + .slider:before { transform: translateX(24px); }
-
-        .tip-box {
-            font-size: 0.8rem;
-            color: #ccc;
-            background: #222;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 15px;
-            border-left: 3px solid #ffb86c;
-            line-height: 1.4;
-        }
-    </style>
 </head>
 
 <body>
-    <div id="mode-screen">
-        <h1>SUBWAY SURFERS HUB</h1>
-        <div class="btn-container">
-            <button class="menu-btn" onclick="initTrainingMode('training')">No Coin Training Mode</button>
-            <button class="menu-btn" onclick="initTrainingMode('real')">The Real Game</button>
-        </div>
+    <div id="game-container" style="width: 100vw; height: 100vh; margin: 0; padding: 0; overflow: hidden; background-color: #000;">
+        <canvas id="canvas" style="width: 100%; height: 100%; display: block;"></canvas>
     </div>
-
-    <div id="mod-menu">
-        <h2>Trainer Menu <span class="menu-status" id="mode-badge">TRAINING</span></h2>
-        
-        <div class="mod-option">
-            <span>WASD Key Controls</span>
-            <label class="switch">
-                <input type="checkbox" id="wasd-toggle" checked>
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <div class="mod-option">
-            <span>Fast A/D Strafe Speed</span>
-            <label class="switch">
-                <input type="checkbox" id="speed-toggle" checked>
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <div class="mod-option">
-            <span>Pass Through/No Coins</span>
-            <label class="switch">
-                <input type="checkbox" id="coin-toggle" checked>
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <div class="tip-box">
-            Press <strong>Ctrl + K</strong> to show or hide this panel.<br><br>
-            <strong>Controls:</strong> W (Jump), S (Duck), A (Left), D (Right)
-        </div>
-    </div>
-
-    <script src="./master-loader.js"></script>
-	
+    <script type="text/javascript" src="master-loader.js"></script>
     <script type="text/javascript">
-        let activeTrainerMode = 'real';
-
-        function initTrainingMode(mode) {
-            activeTrainerMode = mode;
-            const screen = document.getElementById('mode-screen');
-            const badge = document.getElementById('mode-badge');
-            
-            if (mode === 'training') {
-                badge.innerText = "TRAINING MODE";
-                badge.style.color = "#50fa7b";
-                document.getElementById('mod-menu').style.display = 'block';
-                // Trigger interceptor routines
-                setupNoCoinHooks();
-            } else {
-                badge.innerText = "REAL GAME";
-                badge.style.color = "#ff5555";
-                document.getElementById('wasd-toggle').checked = false;
-                document.getElementById('coin-toggle').checked = false;
-            }
-            
-            screen.style.opacity = '0';
-            setTimeout(() => {
-                screen.style.display = 'none'; // Fixed double .style typo
-            }, 400);
-        }
-
-        // CONTROL KEY BIND LISTENER (Ctrl + K)
-        window.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-                e.preventDefault();
-                const menu = document.getElementById('mod-menu');
-                menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
-            }
-        });
-
-        // GLOBAL INPUT FORWARDER & STRAFE ACCELERATOR
-        window.addEventListener('keydown', function(e) {
-            let key = e.key.toLowerCase();
-            let isWasdActive = document.getElementById('wasd-toggle').checked;
-            let isFastStrafeActive = document.getElementById('speed-toggle').checked;
-
-            if (isWasdActive) {
-                if (key === 'a') {
-                    forwardKeyToEngine("ArrowLeft");
-                    if (activeTrainerMode === 'training' && isFastStrafeActive) {
-                        setTimeout(() => forwardKeyToEngine("ArrowLeft"), 10);
-                    }
-                }
-                else if (key === 'd') {
-                    forwardKeyToEngine("ArrowRight");
-                    if (activeTrainerMode === 'training' && isFastStrafeActive) {
-                        setTimeout(() => forwardKeyToEngine("ArrowRight"), 10);
-                    }
-                }
-                else if (key === 'w') {
-                    forwardKeyToEngine("ArrowUp");
-                }
-                else if (key === 's') {
-                    forwardKeyToEngine("ArrowDown");
-                }
-            }
-        }, true); // Setting useCapture to true ensures we catch inputs before the canvas swallows them
-
-        function forwardKeyToEngine(keyCodeName) {
-            const canvasElement = document.querySelector('canvas');
-            if (canvasElement) {
-                // Generate standardized keyboard events for Unity WebGL
-                const downEvent = new KeyboardEvent('keydown', {
-                    key: keyCodeName,
-                    code: keyCodeName,
-                    keyCode: keyCodeName === "ArrowLeft" ? 37 : keyCodeName === "ArrowUp" ? 38 : keyCodeName === "ArrowRight" ? 39 : 40,
-                    bubbles: true,
-                    cancelable: true
-                });
-                canvasElement.dispatchEvent(downEvent);
-            }
-        }
-
-        // RUNTIME HOOKS FOR NO COIN MAP TRAINING
-        function setupNoCoinHooks() {
-            // Intercepts network/fetch file requests for the city map assets if loaded over HTTP
-            const originalFetch = window.fetch;
-            window.fetch = async function(...args) {
-                const response = await originalFetch(...args);
-                let url = args[0];
-                
-                if (typeof url === 'string' && (url.includes('gamedata') || url.includes('.json') || url.includes('top_run'))) {
-                    let textData = await response.text();
-                    try {
-                        // Strips coin objects entirely out of the level array layout dynamically
-                        if (document.getElementById('coin-toggle').checked) {
-                            textData = textData.replace(/"coin_gold"|精度币|coin/g, '"empty_asset"');
-                            textData = textData.replace(/"pickup_coin"/g, '"pickup_null"');
-                        }
-                    } catch(e) { console.log("Data processing skipped", e); }
-                    
-                    return new Response(textData, {
-                        status: response.status,
-                        statusText: response.statusText,
-                        headers: response.headers
-                    });
-                }
-                return response;
-            };
-        }
-
         window.SDK_OPTIONS = {
             gameId: "4i34j6xes2vdim7k55nky9w8s7wp1m75",
-            onEvent: function (a) {
-                switch (a.name) {
+            onEvent: function (eventData) {
+                switch (eventData.name) {
                     case "SDK_GAME_PAUSE":
-                    break;
+                        break;
                     case "SDK_GAME_START":
-                    break;
+                        break;
                 }
             }
         };
 
-        (function (a, b, c) {
-            var d = a.getElementsByTagName(b)[0];
-            a.getElementById(c) || (a = a.createElement(b), a.id = c, a.src = "https://api.gamemonetize.com/sdk.js", d.parentNode.insertBefore(a, d))
-        })(document, "script", "gamemonetize-sdk"); 
+        (function (d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = "https://api.gamemonetize.com/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        })(document, "script", "gamemonetize-sdk");
     </script>
 </body>
 
-<script type="text/javascript">
-    function google_analytics() {
-        if (typeof sdk !== 'undefined' && sdk.showBanner !== 'undefined') {
-            sdk.showBanner();
-        }
-    };
-    function google_analytics_ID() {
-        if (typeof sdk !== 'undefined' && sdk.showBanner !== 'undefined') {
-            sdk.showBanner();
-        }
-    };
-</script>
 </html>
